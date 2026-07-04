@@ -5,7 +5,7 @@ from scipy.optimize import curve_fit
 from discrete_fourier_analysis import analyze_and_plot
 
 H_alpha_air = 6562.8
-D1 = 5896
+D1 = 5896+600
 C = 300000
 
 # data harness
@@ -58,6 +58,7 @@ def fit_double_gaussian(y_data, x_data):
     return params
 
 half_widths = []
+velocities = []
 
 # analysis
 def analysis(i):
@@ -80,9 +81,9 @@ def analysis(i):
     A_lap, mu_lap, b_lap, C_lap = fit_sec_2
 
     # Calculate velocity
-    lmbd = mu2/10 + (H_alpha_air - D1)
+    lmbd = mu2/10000 + (H_alpha_air - D1)
     print(f"mu_lap: {mu_lap}");
-    delta_lmbd = np.abs(mu_lap - lmbd)/10000 # scale the pixel 1 to 10000
+    delta_lmbd = (mu_lap - lmbd)/10000 # scale the pixel 1 to 10000
     velocity = delta_lmbd / lmbd * C
     print(f"delta_lambda/lambda: {delta_lmbd / lmbd}");
     print(f"Velocity: {velocity} km/s");
@@ -90,25 +91,26 @@ def analysis(i):
     # Calculate mid width
     laplace_fwhm = 2 * abs(b_lap) * np.log(2)
     half_widths.append(laplace_fwhm)
+    velocities.append(velocity)
     print(f"Mid point width: {laplace_fwhm}");
 
 
     # Plotting
-    # plt.plot(i, label="full row")
-    # plt.plot(x_section1, section1, label="section 1 data")
-    # plt.plot(x_section1, fit_1, label="section 1 Gaussian fit")
+    #plt.plot(i, label="full row")
+    #plt.plot(x_section1, section1, label="section 1 data")
+    #plt.plot(x_section1, fit_1, label="section 1 Gaussian fit")
 
-    # plt.scatter(lmbd, 0, label="expected shifted H-alpha")
-    # plt.scatter(mu_lap, 0, label="measured Laplace center")
-    # plt.scatter(mu2, 0, label="D1/second Gaussian center")
+    #plt.scatter(lmbd, 0, label="expected shifted H-alpha")
+    #plt.scatter(mu_lap, 0, label="measured Laplace center")
+    #plt.scatter(mu2, 0, label="D1/second Gaussian center")
 
-    # plt.plot(x_section2, section2, label="section 2 data")
-    # plt.plot(x_section2, fit_2, label="section 2 Laplace fit")
-    # # plt.scatter(mu2, 0);
-    # # plt.scatter(mu_lap, 0);
+    #plt.plot(x_section2, section2, label="section 2 data")
+    #plt.plot(x_section2, fit_2, label="section 2 Laplace fit")
+    ## plt.scatter(mu2, 0);
+    ## plt.scatter(mu_lap, 0);
 
-    # plt.legend()
-    # plt.show()
+    #plt.legend()
+    #plt.show()
 
 
 for i in images:
@@ -123,7 +125,9 @@ plt.ylabel("Hα half-width [Å]")
 plt.title("Hα half-width over time")
 plt.show()
 
+print(f"Max: {max(velocities)}");
+print(f"Min: {min(velocities)}");
 analyze_and_plot(time, half_widths)
-
+analyze_and_plot(time, velocities)
 
 
